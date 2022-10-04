@@ -1,0 +1,16 @@
+{
+  "name": "api-example",
+  "version": "0.0.0",
+  "devDependencies": {
+    "wrangler": "2.1.9"
+  },
+  "private": true,
+  "scripts": {
+    "start": "wrangler dev",
+    "deploy": "wrangler publish"
+  },
+  "dependencies": {
+    "@supabase/postgrest-js": "^0.38.0",
+    "itty-router": "^2.6.6"
+  }
+}
