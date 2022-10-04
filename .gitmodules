@@ -1,0 +1,3 @@
+[submodule "following_tutorial/postgres-postgrest-cloudflared-example"]
+	path = following_tutorial/postgres-postgrest-cloudflared-example
+	url = https://github.com/cloudflare/postgres-postgrest-cloudflared-example.git
