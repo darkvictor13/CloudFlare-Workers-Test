@@ -1,0 +1,38 @@
+version: "3"
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    #network_mode: host
+    environment:
+      TUNNEL_URL: http://postgrest:3000
+      #TUNNEL_URL: http://swagger:8080
+    command: "tunnel --no-autoupdate"
+    volumes:
+      - ./cloudflared:/etc/cloudflared
+    links:
+      - postgrest:postgrest
+      #- swagger:swagger
+    depends_on:
+      - postgrest
+      #- swagger
+
+  postgrest:
+    image: postgrest/postgrest
+    ports:
+      - "3000:3000"
+    environment:
+      PGRST_DB_URI: "postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+      PGRST_OPENAPI_SERVER_PROXY_URI: http://127.0.0.1:3000
+      PGRST_DB_ANON_ROLE: ${POSTGRES_USERNAME}
+      PGRST_JWT_SECRET: secret
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    environment:
+      # TODO: use the url from cloudflared
+      API_URL: http://localhost:3000/
+      API_KEY: secret
