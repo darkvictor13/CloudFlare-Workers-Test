@@ -1,19 +1,19 @@
 version: "3"
 services:
-  cloudflared:
-    image: cloudflare/cloudflared:latest
+  #cloudflared:
+    #image: cloudflare/cloudflared:latest
     #network_mode: host
-    environment:
-      TUNNEL_URL: http://postgrest:3000
+    #environment:
+      #TUNNEL_URL: http://postgrest:3000
       #TUNNEL_URL: http://swagger:8080
-    command: "tunnel --no-autoupdate"
-    volumes:
-      - ./cloudflared:/etc/cloudflared
-    links:
-      - postgrest:postgrest
+    #command: "tunnel --no-autoupdate"
+    #volumes:
+      #- ./cloudflared:/etc/cloudflared
+    #inks:
+      #- postgrest:postgrest
       #- swagger:swagger
-    depends_on:
-      - postgrest
+    #depends_on:
+      #- postgrest
       #- swagger
 
   postgrest:

@@ -1,0 +1,12 @@
+{
+  "name": "api-traact",
+  "version": "0.0.0",
+  "devDependencies": {
+    "wrangler": "2.1.9"
+  },
+  "private": true,
+  "dependencies": {
+    "@supabase/postgrest-js": "^0.38.0",
+    "itty-router": "^2.6.6"
+  }
+}

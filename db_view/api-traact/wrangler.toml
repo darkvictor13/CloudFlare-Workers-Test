@@ -1,0 +1,4 @@
+name = "api-traact"
+main = "src/index.js"
+compatibility_date = "2022-10-07"
+account_id = "af7cc5496ae79197f268c7423c0d9451"
