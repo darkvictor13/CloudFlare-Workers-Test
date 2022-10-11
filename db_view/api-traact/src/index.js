@@ -11,11 +11,14 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { Router } from "itty-router";
 
-const router = Router();
+const router = Router({ base: "/api" });
 const client = new PostgrestClient(POSTGREST_ENDPOINT);
 
-router.get("/users", async (request) => {
-  const { data, error } = await client.from("users").select();
+router.get("/count/users", async (request) => {
+  const { _ , error, count } = await client
+    .from("users")
+    .select("id", { count: "exact" });
+
   if (error !== null) {
     return new Response(JSON.stringify(error), {
       status: 500,
@@ -24,13 +27,21 @@ router.get("/users", async (request) => {
       },
     });
   }
-  return new Response(JSON.stringify(data), {
-    headers: { "content-type": "application/json" },
+  return new Response(JSON.stringify({ count }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 });
 
-router.get("/", async (request) => {
-  const { data, error } = await client.from("employees").select();
+router.get("/tasks/:status", async (request) => {
+  const status = request.params.status || 'DONE';
+  const { data, error } = await client
+    .from("tasks")
+    .select("tags, status, createdAt, updatedAt")
+    .eq("status", status);
+
   if (error !== null) {
     return new Response(JSON.stringify(error), {
       status: 500,
@@ -40,7 +51,10 @@ router.get("/", async (request) => {
     });
   }
   return new Response(JSON.stringify(data), {
-    headers: { "content-type": "application/json" },
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 });
 
@@ -80,6 +94,5 @@ addEventListener("fetch", (event) => {
 });
 
 async function handleRequest(request) {
-  console.log(POSTGREST_ENDPOINT);
   return router.handle(request);
 }
