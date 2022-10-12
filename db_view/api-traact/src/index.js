@@ -14,6 +14,7 @@ import { Router } from "itty-router";
 const router = Router({ base: "/api" });
 const client = new PostgrestClient(POSTGREST_ENDPOINT);
 
+// Count all users in the database
 router.get("/count/users", async (request) => {
   const { _ , error, count } = await client
     .from("users")
@@ -34,6 +35,65 @@ router.get("/count/users", async (request) => {
     },
   });
 });
+
+// Endpoint for documents analytics
+// Returns the number of documents edited, downloaded and uploaded separeted by day
+router.get("/documents", async (request) => {
+  const {data, error} = await client
+    .from("documents")
+    .select("id, createdAt, updatedAt");
+
+  if (error !== null) {
+    return new Response(JSON.stringify(error), {
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  let created = data.reduce((acc, doc) => {
+    const date = new Date(doc.createdAt).toLocaleDateString();
+    if (acc[date]) {
+      acc[date] += 1;
+    } else {
+      acc[date] = 1;
+    }
+    return acc;
+  }, {});
+  // sort by date
+  created = Object.keys(created)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .reduce((acc, key) => {
+      acc[key] = created[key];
+      return acc;
+    }, {});
+
+  let updated = data.reduce((acc, doc) => {
+    const date = new Date(doc.updatedAt).toLocaleDateString();
+    if (acc[date]) {
+      acc[date] += 1;
+    } else {
+      acc[date] = 1;
+    }
+    return acc;
+  }, {});
+  // sort by date
+  updated = Object.keys(updated)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .reduce((acc, key) => {
+      acc[key] = updated[key];
+      return acc;
+    }, {});
+
+  return new Response(JSON.stringify({"created": created, "updated": updated}), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+});
+
 
 router.get("/tasks/:status", async (request) => {
   const status = request.params.status || 'DONE';
@@ -57,35 +117,6 @@ router.get("/tasks/:status", async (request) => {
     },
   });
 });
-
-/*
-router.get("/users", async (request) => {
-  const { data, error } = await client.from("users").select();
-  return new Response(JSON.stringify(data), {
-    headers: { "content-type": "application/json" },
-  });
-});
-
-router.get("/users/:id", async ({ params }) => {
-  console.log(params);
-  const { id } = params;
-  const { data, error } = await client.from("users").select().eq("id", id);
-  console.log(data);
-  const user = data.length ? data[0] : null;
-  return new Response(JSON.stringify({ user }), {
-    headers: { "content-type": "application/json" },
-  });
-});
-
-router.post("/users", async (request) => {
-  const userData = await request.json();
-  const { data, error } = await client.from("users").insert(userData);
-  const user = data.length ? data[0] : null;
-  return new Response(JSON.stringify({user}), {
-    headers: { "content-type": "application/json" },
-  });
-});
-*/
 
 router.all("*", () => new Response("Not Found", { status: 404 }));
 
