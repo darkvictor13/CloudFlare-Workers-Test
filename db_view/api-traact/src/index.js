@@ -11,7 +11,7 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { Router } from "itty-router";
 
-const response_headers = new Headers({"Content-Type": "application/json"});
+const response_headers = new Headers({ "Content-Type": "application/json" });
 const router = Router({ base: "/api" });
 const client = new PostgrestClient(POSTGREST_ENDPOINT);
 
@@ -88,9 +88,6 @@ router.get("/documents", async (request) => {
 });
 
 router.get("/tasks/:status", async (request) => {
-  let response_status = 200;
-  let response_body = { status: "ok" };
-
   const status = request.params.status;
   if (
     status !== "OPENED" &&
@@ -99,33 +96,43 @@ router.get("/tasks/:status", async (request) => {
     status !== "DONE"
   ) {
     response_status = 400;
-    response_body = JSON.stringify({
-      error: "Invalid status",
-      hint: "Status must be one of OPENED, BLOCKED, DOING or DONE",
-    });
-    return new Response(response_body, {
-      status: response_status,
-      headers: response_headers,
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Invalid status",
+        hint: "Status must be one of OPENED, BLOCKED, DOING or DONE",
+      }),
+      {
+        status: 400,
+        headers: response_headers,
+      }
+    );
   }
   const { data, error } = await client
     .from("tasks")
     .select("tags, status, createdAt, updatedAt")
     .eq("status", status);
 
-  if (error !== null) {
-    response_status = 500;
-    response_body = JSON.stringify(error);
-  } else {
-    response_body = JSON.stringify(data);
-  }
-  return new Response(response_body, {
-    status: response_status,
+  const has_error = error !== null;
+  return new Response(JSON.stringify(has_error ? error : data), {
+    status: has_error ? 500 : 200,
     headers: response_headers,
   });
 });
 
-router.all("*", () => new Response("Not Found", { status: 404 }));
+// Respond to any request
+// with a JSON object containing the request details
+router.all("*", (req) => {
+  return new Response(
+    JSON.stringify({
+      message: "Page not Found",
+      hint: `The server cant handle url: ${req.url}`,
+    }),
+    {
+      status: 404,
+      headers: response_headers,
+    }
+  );
+});
 
 addEventListener("fetch", (event) => {
   event.respondWith(handleRequest(event.request));
