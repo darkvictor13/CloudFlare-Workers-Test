@@ -1,3 +1,9 @@
 name = "api-ts"
 main = "src/index.ts"
 compatibility_date = "2022-10-14"
+account_id = "af7cc5496ae79197f268c7423c0d9451"
+[env]
+    [env.vars]
+        POSTGREST_ENDPOINT="link" # Tem que ser definido em .dev.vars
+        # [env.secrets]
+        # POSTGREST_ENDPOINT
