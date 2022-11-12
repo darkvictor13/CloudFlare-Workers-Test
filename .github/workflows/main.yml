@@ -16,3 +16,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           workingDirectory: 'db_view/api-traact'
+          preCommands: npm install
